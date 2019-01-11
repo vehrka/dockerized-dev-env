@@ -1,0 +1,23 @@
+version: "3"
+services:
+    devenv:
+        container_name: devenv
+        build: .
+        stdin_open: true
+        tty: true
+        volumes:
+            - ~/.ssh:/home/geographica/.ssh
+    postgis:
+        container_name: devenv_postgis
+        image: geographica/postgis:spry_sparrow
+        env_file:
+            - ./config.env
+        ports:
+            - "5432:5432"
+        volumes:
+            - db-data:/data
+            - ~/.ssh:/home/geographica/.ssh
+        environment:
+            - POSTGRES_PASSWD=postgres
+volumes:
+    db-data:
