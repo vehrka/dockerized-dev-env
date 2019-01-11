@@ -1,13 +1,38 @@
-FROM python:alpine3.8
-RUN apk add --update git tmux vim zsh
+FROM ubuntu:bionic
+RUN apt-get update && apt-get install -y \
+        ack \
+        autojump \
+        curl \
+        git \
+        locales \
+        sudo \
+        tmux \
+        vim \
+        wget \
+        zsh
+#
+# SET LOCALE
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    locale-gen
 #
 # USER MANAGEMENT
 ENV DOCKER_USER geographica
 RUN adduser --disabled-password --gecos '' "$DOCKER_USER"
-# # THIS LINE IS A SECURITY ISSUE IN OTHER THAN DEV ENV
+# # Give root priviledges
+RUN adduser "$DOCKER_USER" sudo
+# Give passwordless sudo. This is only acceptable as it is a private
+# development environment not exposed to the outside world. Do NOT do this on
+# your host machine or otherwise.
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
 USER "$DOCKER_USER"
 WORKDIR "/home/$DOCKER_USER"
-#
+ENV LANG en_GB.UTF-8
+ENV LANGUAGE en_GB:en
+ENV LC_ALL en_GB.UTF-8
+# The sudo message is annoying, so skip it
+RUN touch ~/.sudo_as_admin_successful#
+
 # VIM CONFIG
 RUN mkdir -p "$HOME/.config/"
 RUN git clone https://github.com/vehrka/dotvim.git "$HOME/.config/dotvim"
